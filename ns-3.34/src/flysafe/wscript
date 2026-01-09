@@ -1,0 +1,59 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+# def options(opt):
+#     pass
+
+# def configure(conf):
+#     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
+
+def build(bld):
+    ascon_lib = bld(features='c cstlib',        
+                    target='ascon-lib', 
+                    source=['ascon-128/aead.c', 'ascon-128/printstate.c'])  # Vinicius - MiM
+    ascon_lib.includes = 'ascon-128'            # Vinicius - MiM
+    
+    module = bld.create_ns3_module('flysafe', ['network', 'internet'])
+
+    module.use.append('OPENSSL')    # Vinicius - MiM
+    module.use.append('ascon-lib')  # Vinicius - MiM
+    module.includes = 'ascon-128'   # Vinicius - MiM
+
+    module.source = [
+        'model/flysafe-tag.cc',
+        'model/flysafe-statistics.cc',
+#        'model/status-on.cc',
+        'model/flysafe-onoff.cc',
+        'model/flysafe-packet-sink.cc',
+        'helper/utils.cc',
+        ]
+
+    module_test = bld.create_ns3_module_test_library('flysafe')
+    module_test.source = [
+        'test/flysafe-test-suite.cc',
+        ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'flysafe'
+    headers.source = [
+        'model/flysafe-tag.h',
+        'model/flysafe-statistics.h',
+#        'model/status-on.h',
+        'model/flysafe-onoff.h',
+        'model/flysafe-packet-sink.h',
+        'helper/utils.h',
+        
+        'ascon-128/crypto_aead.h',
+        'ascon-128/api.h',
+        'ascon-128/ascon.h',
+        'ascon-128/constants.h',
+        'ascon-128/permutations.h',
+        'ascon-128/printstate.h',
+        'ascon-128/round.h',
+        'ascon-128/word.h'
+        ]
+
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
+
+    # bld.ns3_python_bindings()
+
