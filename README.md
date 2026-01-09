@@ -3,7 +3,10 @@
 Unmanned aerial vehicles (UAV) have been recognized as a versatile platform for various services. During the flight, these vehicles must avoid collisions to operate safely. In this way, they demand to keep spatial awareness, i.e., to know others in their coverage area. However, mobility and positioning hamper building UAV network infrastructure to support reliable basic services. Thus, such vehicles call for a location service with up-to-date information resilient to false location injection threats. This work proposes FlySafe, a resilient UAV location-sharing service that employs opportunistic approaches to deliver UAVs’ location. FlySafe takes into account the freshness of UAVs’ location to maintain their spatial awareness. Further, it counts on the age of the UAV’s location information to trigger device discovery. Simulation results showed that FlySafe achieved spatial awareness up to 94.15% of UAV operations, being resilient to false locations injected in the network. Moreover, the accuracy in device discovery achieved 94.53% with a location error of less than 2 m.
 
 ```
-Batista, A. and dos Santos, A. L. (2025). Resilient uavs location sharing service based on information freshness and opportunistic deliveries. Pervasive and Mobile Computing, 111:102066. doi: https://doi.org/10.1016/j.pmcj.2025.102066
+Batista, A. and dos Santos, A. L. (2025). Resilient uavs location sharing
+service based on information freshness and opportunistic deliveries.
+Pervasive and Mobile Computing, 111:102066.
+doi: https://doi.org/10.1016/j.pmcj.2025.102066
 ```
 
 This repository contains the implementation of the Man in the Middle attack on FlySafe using the NS-3 network simulator.
