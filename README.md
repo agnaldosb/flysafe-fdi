@@ -30,7 +30,7 @@ The project has been implemented and validated in the following environment:
 
 * Install NS-3, version 3.34, according to the manual instructions
 
-> **Note:** It is recommended to employ version 3.34. Other versions may not work properly.
+  > **Note:** It is recommended to employ version 3.34. Other versions may not work properly.
 
 * Default path: `~/ns-allinone-3.34/`
 
