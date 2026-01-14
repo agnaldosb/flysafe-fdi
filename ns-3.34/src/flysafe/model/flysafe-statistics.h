@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iomanip>
 
 #include "ns3/address-utils.h"
 #include "ns3/address.h"
@@ -35,32 +34,16 @@ public:
                         vector<ns3::MyTag::NeighborFull> neighList,
                         double messageTime);//,
                         //vector<ns3::MyTag::MaliciousNode> maliciousList);
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
-  /*void ReceiverMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
+
+  void ReceiverMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
                                  vector<ns3::MyTag::MaliciousNode> maliciousList);
 
   void SenderMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
-                                 vector<ns3::MyTag::MaliciousNode> maliciousList);*/
+                                 vector<ns3::MyTag::MaliciousNode> maliciousList);
 
   void SenderCallback(string path, double timeNow, Ipv4Address senderAdd, 
                       Ipv4Address targetAdd, int msgTag, string message,
                       Vector position, vector<ns3::MyTag::NeighborFull> neighList);
-
-  // Vinicius - MiM - Jul 16, 2025 - Callback for packet sniffer
-  void SnifferCallback(string path, double timeNow, Vector senderPosition, 
-                        Ipv4Address snifferIp, Ipv4Address senderIp, Ipv4Address receiverIp,
-                        int msgTag, vector<ns3::MyTag::NeighborFull> neighList, 
-                        double messageTime);
-
-  // Vinicius - MiM - Sep 22, 2025 - Callback for MiM attack
-  void MiMCallback(string path, double timeNow, Vector senderPosition, Vector forgedPosition,
-                        Ipv4Address snifferIp, Ipv4Address senderIp, Ipv4Address receiverIp,
-                        int msgTag, vector<ns3::MyTag::NeighborFull> neighList, 
-                        double messageTime);
 
   /**
   * @brief Statistics of FlySafePacketSink Application - Monitors nodes with empty NL 
@@ -76,11 +59,6 @@ public:
                        Ipv4Address nodeAdd,
                        vector<ns3::MyTag::NeighborFull> neighList);
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Update state of malicious nodes
    *  
@@ -90,13 +68,13 @@ public:
    * @param nodeIP IP of owner node 
    * @param maliciousList malicious node list from the node
    */
-  /*void UpdateMaliciousStateControl(double timeNow, Ipv4Address nodeIP,
+  void UpdateMaliciousStateControl(double timeNow, Ipv4Address nodeIP,
                             vector<ns3::MyTag::MaliciousNode> maliciousList);
                             
   bool IsInControlStateList(Ipv4Address nodeIP, Ipv4Address maliciousIP);
   uint8_t GetMaliciousControleState(Ipv4Address nodeIP, Ipv4Address maliciousIP);
   void SetMaliciousBlockedTime(Ipv4Address nodeIP, Ipv4Address maliciousIP, double tBlocked);
-  void PrintMaliciousControlStateList();*/
+  void PrintMaliciousControlStateList();
 
   Address GetNodeIpAddress(Ptr<Node> node);
   string GetNeighborList(Ptr<Node> node);
@@ -135,24 +113,19 @@ public:
   }; 
 
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
   * @brief Struct to store infos to controle malicious nodes state
   * 
   * @date Dez 01, 2023
   */
-  /*struct MaliciousControl {
+  struct MaliciousControl {
          Ipv4Address nodeIP;
          Ipv4Address maliciousIP;
          uint8_t maliciousState;
          double tSuspicious;
          double tBlocked;
          double avgTime;
-  };*/ 
+  }; 
 
   /**
    * @brief Identify possible neighbors nodes from all existent nodes (range = 81m)
@@ -179,11 +152,6 @@ public:
    */
   string NeighListToString(vector<ns3::MyTag::NeighborFull> neighList);
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Converts malicious neighbor list vector to string
    * @date Nov 27, 2023
@@ -191,7 +159,7 @@ public:
    * @param neighList neighbor list vector
    * @return string neighbor list on string
    */
-  //string NeighMaliciousListToString(vector<ns3::MyTag::MaliciousNode> maliciousList);
+  string NeighMaliciousListToString(vector<ns3::MyTag::MaliciousNode> maliciousList);
 
   /**
    * @brief Get all nodes positions 
@@ -230,25 +198,15 @@ public:
    */
   void MessageResumeLogFile(string simDate);
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Save control data from malicious nodes to log files - suspicious and blocked
    * @date Dez 4, 2023
    * 
    * @param simDate Simulation date and time string
    */
-  //void MaliciousControlResumeLogFile(string simDate);
+  void MaliciousControlResumeLogFile(string simDate);
 
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Verify wether a malicious node is already under control by another node
    *  
@@ -259,7 +217,7 @@ public:
    * @return true - there is the state under control
    * @return false - there is not the state under control
    */
-  //bool IsStateInList(uint8_t state);
+  bool IsStateInList(uint8_t state);
 
 
   // Global variables for control spatial awareness 
@@ -305,14 +263,9 @@ public:
   ofstream m_neighAnalysisFile;           //!< Store stream for neighborhood analysis traces file
   ofstream m_neighAnalysisGnuplotFile;    //!< Store stream for neighborhood analysis Gnuplot traces file
   ofstream m_maliciousFile;               //!< Store stream for malicious neighborhood evolution traces file
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
-  /*typedef std::vector<struct MaliciousControl> MaliciousHandlerList;
-  MaliciousHandlerList m_maliciousControlState;*/
-  // std::vector<struct MaliciousControl> m_maliciousControlState; //!< Store malicious control data
 
+  typedef std::vector<struct MaliciousControl> MaliciousHandlerList;
+  MaliciousHandlerList m_maliciousControlState;
+  // std::vector<struct MaliciousControl> m_maliciousControlState; //!< Store malicious control data
 };
 } // namespace ns3

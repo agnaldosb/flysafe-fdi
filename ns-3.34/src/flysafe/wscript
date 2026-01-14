@@ -7,17 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    ascon_lib = bld(features='c cstlib',        
-                    target='ascon-lib', 
-                    source=['ascon-128/aead.c', 'ascon-128/printstate.c'])  # Vinicius - MiM
-    ascon_lib.includes = 'ascon-128'            # Vinicius - MiM
-    
     module = bld.create_ns3_module('flysafe', ['network', 'internet'])
-
-    module.use.append('OPENSSL')    # Vinicius - MiM
-    module.use.append('ascon-lib')  # Vinicius - MiM
-    module.includes = 'ascon-128'   # Vinicius - MiM
-
     module.source = [
         'model/flysafe-tag.cc',
         'model/flysafe-statistics.cc',
@@ -41,15 +31,6 @@ def build(bld):
         'model/flysafe-onoff.h',
         'model/flysafe-packet-sink.h',
         'helper/utils.h',
-        
-        'ascon-128/crypto_aead.h',
-        'ascon-128/api.h',
-        'ascon-128/ascon.h',
-        'ascon-128/constants.h',
-        'ascon-128/permutations.h',
-        'ascon-128/printstate.h',
-        'ascon-128/round.h',
-        'ascon-128/word.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

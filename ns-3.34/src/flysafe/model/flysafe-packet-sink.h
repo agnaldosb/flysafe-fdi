@@ -5,8 +5,8 @@
 #include "ns3/log.h"
 #include "ns3/node.h"
 #include "ns3/packet-socket-address.h"
-#include "ns3/random-variable-stream.h"
 #include "ns3/string.h"
+#include "ns3/mobility-module.h"
 
 //#include "flysafe-tag.h"
 #include "ns3/utils.h"
@@ -33,8 +33,8 @@ public:
   static TypeId GetTypeId(void);
   FlySafePacketSink();
   virtual ~FlySafePacketSink();
-  void Setup(Address addressTo, uint32_t protocolId, double maliciousTime, bool defense, bool mitigation, double maxSpeed, double maxCoverage);  // Vinicius - MiM - Nov 14, 2025 - Set defense mechanism
-                                                                                                                                // Vinicius - MiM - Nov 26, 2025 - Mitigating MiM
+  void Setup(Address addressTo, uint32_t protocolId, double maliciousTime);
+
   /**
   * @brief Struct to store infos from a neighbor node
   * @date 25022023
@@ -128,24 +128,14 @@ private:
    */
   vector<ns3::MyTag::NeighborFull> GetNeighborIpListFull();
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Get malicious neighbor list from the node
    * @date Nov 27, 2023
    * 
    * @return vector<ns3::MyTag::MaliciousNode> 
    */
-  //vector<ns3::MyTag::MaliciousNode> GetMaliciousNeighborList();
+  vector<ns3::MyTag::MaliciousNode> GetMaliciousNeighborList();
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
   /**
    * @brief Notify neighbor nodes (one hop away and non malicious) about a malicious node
    * 
@@ -153,34 +143,9 @@ private:
    * @param state - 0 (suspect) or 1 (blocked)
    * @param tagValue - Message tag
    */
-  //void NotifyNeighbors(Ipv4Address maliciousIP, Vector position, uint8_t state, uint8_t tagValue);
-
-  /**
-   * @author Vinicius - MiM
-   * 
-   * @date Nov 26, 2025
-   * 
-   * @brief Verify anomaly in message received from neighbor node
-   * 
-   * * @param tagValue
-   * @param neighborIP
-   * @param reportedPos
-   * @param msgTime
-   * @param distDiference
-   * @param timeNow
-   * 
-   * @return true if anomaly detected, false otherwise
-   */
-  bool CheckAnomaly(uint8_t tagValue, Ipv4Address neighborIP, Vector reportedPos, double msgTime,  double distDiference, double timeNow);
+  void NotifyNeighbors(Ipv4Address maliciousIP, Vector position, uint8_t state, uint8_t tagValue);
 
 //}
-
-  // ---------------------------------------------------------------------
-  // Vinicius - MiM - Nov 26, 2025 - Mitigating MiM
-  // ---------------------------------------------------------------------
-  double MIN_PACKET_INTERVAL = 0.1;
-  double m_maxUavSpeed; // m/s
-  double m_maxUavCoverage; // Meters 
 
   // inherited from Application base class.
   Address m_local;                //!< Local address to bind to
@@ -194,15 +159,7 @@ private:
   string m_myId;                  //!< store competence + interests
   Address m_node;                 //!< Application node address
   Ipv4Address m_nodeIP;           //!< Node's IPv4 Address
-  bool m_defense;                 //!< True if defense mechanism is active  -  Vinicius - MiM - Nov 14, 2025 - Set defense mechanism
-  bool m_mitigation;              //!< True if mitigation mechanism is active  -  Vinicius - MiM - Dec 01, 2025 - Set mitigation mechanism
-
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
-  //double m_maliciousTime;         //!< Store the time a node becomes malicious (default: 9999.99)
+  double m_maliciousTime;         //!< Store the time a node becomes malicious (default: 9999.99)
 
   TracedCallback<Ptr<const Packet>, const Address &>
       m_rxTrace;              //!< Traced Callback: received packets, source address.
@@ -214,20 +171,9 @@ private:
       //double, std::vector<ns3::MyTag::MaliciousNode>> m_sinkTrace;   //!< Traced Callback: received messages 
   TracedCallback <double, Ipv4Address, Ipv4Address, int, string, Vector,std::vector<ns3::MyTag::NeighborFull>> 
       m_txTrace;              //!< Traced value to sent messages
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
-  /*TracedCallback<double, Ipv4Address, std::vector<ns3::MyTag::MaliciousNode>> 
-      m_sinkMaliciousTrace;*/   //!< Traced Callback: received messages 
-
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-   */
-  //bool m_maliciousRegister;                         //!< Register wether a node becomes malicious
+  TracedCallback<double, Ipv4Address, std::vector<ns3::MyTag::MaliciousNode>> 
+      m_sinkMaliciousTrace;   //!< Traced Callback: received messages 
+  bool m_maliciousRegister;                         //!< Register wether a node becomes malicious
 };
 
 } // namespace ns3

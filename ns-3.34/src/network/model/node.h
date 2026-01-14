@@ -22,21 +22,12 @@
 #define NODE_H
 
 #include <vector>
-#include <string>
-#include <map>
-#include <set>
 
 #include "ns3/object.h"
 #include "ns3/callback.h"
 #include "ns3/ptr.h"
 #include "ns3/net-device.h"
 #include "ns3/vector.h"
-
-#include <openssl/sha.h>
-#include <openssl/evp.h>
-#include <openssl/ec.h>
-#include <openssl/err.h>
-#include <openssl/pem.h>
 
 namespace ns3 {
 
@@ -235,9 +226,9 @@ public:
    */
 
 
-  void RegisterNeighbor (Ipv4Address ip, Vector position, double distance, u_int8_t attitude, u_int8_t quality, uint8_t hop, uint8_t state, double time);
+  void RegisterNeighbor (Ipv4Address ip, Vector position, double distance, u_int8_t attitude, u_int8_t quality, uint8_t hop, uint8_t state); //, double time);
   void UnregisterNeighbor (Ipv4Address ip);
-  void UpdateNeighbor (Ipv4Address ip, Vector position, double distance, uint8_t attitude, uint8_t quality, uint8_t hop, double time); //, uint8_t state);
+  void UpdateNeighbor (Ipv4Address ip, Vector position, double distance, uint8_t attitude, uint8_t quality, uint8_t hop); //, uint8_t state); //, double time);
   Vector GetNeighborPosition (Ipv4Address ip);
   double GetNeighborDistance (Ipv4Address ip);
   uint8_t GetNeighborAttitude (Ipv4Address ip);
@@ -248,8 +239,8 @@ public:
   void SetNeighborHop (Ipv4Address ip, uint8_t hop);
   uint8_t GetNeighborNodeState (Ipv4Address ip);
   void SetNeighborNodeState (Ipv4Address ip, uint8_t state);
-  double GetNeighborInfoTime (Ipv4Address ip);
-  void SetNeighborInfoTime (Ipv4Address ip, double time);
+  //double GetNeighborInfoTime (Ipv4Address ip);
+  //void SetNeighborInfoTime (Ipv4Address ip, double time);
 
   bool IsThereAnyNeighbor ();
   bool IsThereAnyNeighbor (uint8_t hop);
@@ -283,23 +274,6 @@ public:
   bool IsABlockedNode (Ipv4Address ip);
   uint8_t GetNMaliciousNodes ();
   void ClearMaliciousNodeList ();
-
-  // ---------------------------------------------------------------------
-  // Vinicius - MiM - 11 nov 25 - Methods for cryptography
-  // ---------------------------------------------------------------------
-  void SetPublicKey(std::string pubKey);
-  std::string GetPublicKey() const;
-  void SetPrivateKey(std::string privKey);
-  void CreateSharedKey (Ipv4Address neighborIp, const std::string& neighborPubKey);
-  std::string GetSharedKey(Ipv4Address neighborIp) const;
-
-  void AddHandshakeNeighbor (Ipv4Address ip);
-  void RemoveHandshakeNeighbor (Ipv4Address ip);
-  bool IsHandshakeNeighbor (Ipv4Address ip) const;
-  bool IsThereAnyHandshakeNeighbor (void) const;
-  std::set<Ipv4Address> GetHandshakeNeighbors () const;
-  void DecreaseHandshakeQuality();
-  void CleanHandshakeList();
 
 protected:
   /**
@@ -395,7 +369,7 @@ private:
     uint8_t quality;  //!< 0 - 2 controls neighbor absence in the list
     uint8_t hop;      //!< hop = 1 means neibhor in range, 
     uint8_t state;    //!< 0 ordinary, 1 malicious
-    double msgTime;   //!< message send time 
+    //double msgTime;   //!< message send time 
   }; 
 
   struct MaliciousNode
@@ -413,22 +387,6 @@ private:
   MaliciousNodeHandlerList m_MaliciousNodeList; //!< Malicious node list in the node
   Vector m_position;                            //!< Store node position
   u_int8_t m_state;                             //!< Store node state (0 ordinary, 1 malicious)
-
-  // ---------------------------------------------------------------------
-  // Vinicius - MiM - 11 nov 25 - Methods for cryptography
-  // ---------------------------------------------------------------------
-  void AddSharedKey(Ipv4Address neighborIp, std::string sharedKey);
-  bool HasSharedKey(Ipv4Address neighborIp) const;
-  std::string Kdf (const std::string& inputSecret) const;
-
-  // ---------------------------------------------------------------------
-  // Vinicius - MiM - 11 nov 25 - Attributes for cryptography
-  // ---------------------------------------------------------------------
-  std::string m_publicKey;                          //!< Public key
-  std::string m_privateKey;                         //!< Private key
-  std::map<Ipv4Address, std::string> m_sharedKeys;  //!< Shared keys map
-
-  std::map<Ipv4Address, uint8_t> m_handshakeNeighbors;  //!< Handshake neighbors list 
 };
 
 

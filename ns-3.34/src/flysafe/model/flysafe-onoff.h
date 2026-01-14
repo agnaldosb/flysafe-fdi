@@ -31,7 +31,6 @@
 #include "ns3/ptr.h"
 #include "ns3/data-rate.h"
 #include "ns3/traced-callback.h"
-#include "ns3/random-variable-stream.h"
 #include "ns3/seq-ts-size-header.h"
 #include "ns3/packet-socket-address.h"
 #include "ns3/vector.h"
@@ -110,7 +109,7 @@ public:
 
   virtual ~FlySafeOnOff();
 
-  void Setup(Address address, uint32_t protocolId, double maliciousTime, bool defense); // Vinicius - MiM - Nov 14, 2025 - Set defense mechanism
+  void Setup(Address address, uint32_t protocolId, double maliciousTime);
   
   /**
    * \brief Set the total number of bytes to send.
@@ -247,18 +246,13 @@ private:
    */
   vector<ns3::MyTag::NeighborFull> GetNeighborIpListFull();
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-  */
     /**
    * @brief Get malicious neighbor list from the node
    * @date Nov 27, 2023
    * 
    * @return vector<ns3::MyTag::MaliciousNode> 
    */
-  // vector<ns3::MyTag::MaliciousNode> GetMaliciousNeighborList();
+  vector<ns3::MyTag::MaliciousNode> GetMaliciousNeighborList();
   
 
   Ptr<Socket>     m_socket;                         //!< Associated socket
@@ -283,14 +277,8 @@ private:
   Address m_node;                                   //!< Node's IP Address
   Ipv4Address m_nodeIP;                             //!< Node's IPv4 Address
   bool m_searchNeighbors;                           //!< True forces a neighbors search
-  bool m_defense;                                   //!< True if defense mechanism is active  -  Vinicius - MiM - Nov 14, 2025 - Set defense mechanism
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-  */
-  // double m_maliciousTime;                           //!< Store the time a node becomes malicious (default: 9999.99)
-  // bool m_maliciousRegister;                         //!< Register wether a node becomes malicious
+  double m_maliciousTime;                           //!< Store the time a node becomes malicious (default: 9999.99)
+  bool m_maliciousRegister;                         //!< Register wether a node becomes malicious
 
   /// Traced Callback: transmitted packets.
   TracedCallback<Ptr<const Packet> > 
@@ -309,13 +297,8 @@ private:
       m_stopTraces;            //!< Traced Callback: stopped nodes traces 
   TracedCallback<double, Vector, Ipv4Address, std::vector<ns3::MyTag::NeighborFull>>
       m_emptyNLTraces;            //!< Traced Callback: nodes with empty NL traces 
-  /** 
-   * @author Vinicius - MiM
-   * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-   * @date Jul 14, 2025  
-  */
-  // TracedCallback<double, Ipv4Address, std::vector<ns3::MyTag::MaliciousNode>> 
-  //     m_txMaliciousTraces;   //!< Traced Callback: malicious neighbors evolution 
+  TracedCallback<double, Ipv4Address, std::vector<ns3::MyTag::MaliciousNode>> 
+      m_txMaliciousTraces;   //!< Traced Callback: malicious neighbors evolution 
 
 private:
   /**

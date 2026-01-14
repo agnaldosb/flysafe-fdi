@@ -918,11 +918,7 @@ ostringstream neighString;
   return neighString.str();
 }
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
+
 /**
  * @brief Converts malicious neighbor list vector to string
  * @date Nov 27, 2023
@@ -930,7 +926,7 @@ ostringstream neighString;
  * @param neighList neighbor list vector
  * @return string neighbor list on string
  */
-/*string Statistics::NeighMaliciousListToString(vector<ns3::MyTag::MaliciousNode> maliciousList){
+string Statistics::NeighMaliciousListToString(vector<ns3::MyTag::MaliciousNode> maliciousList){
 
   ostringstream maliciousString;
   
@@ -948,7 +944,7 @@ ostringstream neighString;
   maliciousString << endl;
   // "IP,state,recurrence,nNotifiers,notifiers"
   return maliciousString.str();
-}*/
+}
 
 /**
  * @brief Compare the existent neighborhood with the discoverd neighborhood
@@ -1141,10 +1137,9 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
     for (int x = 0; x < (int)distanceError.size(); x++){
       sumDist += distanceError[x];
     }
-    // Vinicius - MiM - Oct 29, 2025 - Commented because was calculating average two times
-    //double value = sumDist/(int)distanceError.size();
+    double value = sumDist/(int)distanceError.size();
     strFinal << (sumDist/(int)distanceError.size());
-    //strFinal << (std::ceil(value * 100.0) / 100.0);
+    strFinal << (std::ceil(value * 100.0) / 100.0);
 
     auto minmax = std::minmax_element(distanceError.begin(), distanceError.end());
     strFinal << "\t"  << *minmax.first; // get MinError
@@ -1163,11 +1158,6 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
   return results;
 }
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
 /**
  * @brief Statistics of FlySafePacketSink Application - Tracing malicious neighborhood evolution
  * @date Nov 23, 2023
@@ -1177,7 +1167,7 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
  * @param recvAdd Receiver node IPv4 address
  * @param maliciousList Malicious neighbor nodes information
  */
-/*void Statistics::ReceiverMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
+void Statistics::ReceiverMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
                                         vector<ns3::MyTag::MaliciousNode> maliciousList)
 {
   ostringstream filename;
@@ -1203,13 +1193,9 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
 
   UpdateMaliciousStateControl(timeNow, recvAdd, maliciousList);
 
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
+
 /**
  * @brief Statistics of FlySafePacketSink Application - Tracing malicious neighborhood evolution
  * @date Nov 23, 2023
@@ -1219,7 +1205,7 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
  * @param recvAdd Receiver node IPv4 address
  * @param maliciousList Malicious neighbor nodes information
  */
-/*void Statistics::SenderMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
+void Statistics::SenderMaliciousCallback(string path, double timeNow, Ipv4Address recvAdd,
                                         vector<ns3::MyTag::MaliciousNode> maliciousList)
 {
   ostringstream filename;
@@ -1244,173 +1230,8 @@ Statistics::EvaluateNeighborhood(Ipv4Address nodeIP, vector<ns3::MyTag::Neighbor
   AppendLineToFile(m_maliciousFile, fileName.str(), textLine.str());
 
   UpdateMaliciousStateControl(timeNow, recvAdd, maliciousList);
-}*/
-
-
-/**
- * @author Vinicius - MiM
- * @brief Statistics of captured packets - Sniffer Callback
- * @note This callback is used to log sniffed packets information from sniffer nodes.
- * @date Jul 16, 2025  
- * 
- * @param path Path to the sniffer file
- * @param timeNow Current simulation time
- * @param senderPosition Position of the sender node
- * @param snifferIp IP address of the sniffer node
- * @param senderIp IP address of the sender node
- * @param receiverIp IP address of the receiver node
- * @param msgTag Message tag of the packet
- * @param neighList List of neighbor nodes with their information
- * @param messageTime Time when the message was sent
- */
-void Statistics::SnifferCallback(string path, double timeNow, Vector senderPosition, 
-                        Ipv4Address snifferIp, Ipv4Address senderIp, Ipv4Address receiverIp,
-                        int msgTag, vector<ns3::MyTag::NeighborFull> neighList, 
-                        double messageTime)
-{
-    ostringstream fileName;
-    ostringstream headerLine;
-    ostringstream textLine;
-    ostringstream aux_neighString;
-    string neighListString;
-    string message;
-
-    // Save sniffer traces to a file
-    // File name: flysafe_sniffer_traces_<node>.txt
-    fileName << m_folderToTraces.c_str() << "flysafe_sniffer_traces_"
-             << snifferIp << ".txt";
-
-    headerLine << "time" << "\t\t" << "senderIP" << "\t\t" << "receiverIP" << "\t\t" << "msgBroad" << "\t\t" << "msgId" << "\t\t" << "msgTrap" << "\t\t" 
-              << "messageTime" << "\t\t" << "senderPosition"  << "\t\t" << "senderNeighborList" << endl;
-
-    AppendHeaderToFile(m_sentFile, fileName.str(), headerLine.str());
-
-    for(auto n : neighList)
-    {
-        aux_neighString << '\t' << n.ip << " : x: " << n.position.x << " y: " 
-                        << n.position.y << " z: " << n.position.z << " hop: " << (int)n.hop << " ";
-    }
-
-    neighListString = aux_neighString.str();
-    
-    if (!neighListString.empty()) {
-        neighListString.pop_back(); 
-    }
-
-    switch (msgTag) {
-        case 0: message = "1\t\t0\t\t0"; break;
-        case 1: message = "0\t\t1\t\t0"; break;
-        case 2: message = "0\t\t0\t\t1"; break;
-        default: message = ""; break;
-    }
-
-    textLine << timeNow << "\t\t\t" << senderIp << "\t\t" << receiverIp << "\t\t" << message << "\t\t"
-            << messageTime << "\t\t" << senderPosition.x << ", " << senderPosition.y << ", " << senderPosition.z << "\t\t" << neighListString << endl;
-    AppendLineToFile(m_sentFile, fileName.str(), textLine.str());
 }
 
-/**
- * @author Vinicius - MiM
- * @brief Statistics of altered packets - MiM Callback
- * @note This callback is used to log altered packets information from sniffer nodes.
- * @date Sep 22, 2025  
- * 
- * @param path Path to the sniffer file
- * @param timeNow Current simulation time
- * @param senderPosition Position of the sender node
- * @param snifferIp IP address of the sniffer node
- * @param senderIp IP address of the sender node
- * @param receiverIp IP address of the receiver node
- * @param msgTag Message tag of the packet
- * @param neighList List of neighbor nodes with their information
- * @param messageTime Time when the message was sent
- */
-void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition, Vector forgedPosition,
-                        Ipv4Address snifferIp, Ipv4Address senderIp, Ipv4Address receiverIp,
-                        int msgTag, vector<ns3::MyTag::NeighborFull> neighList, 
-                        double messageTime)
-{
-    ostringstream fileName;
-    ostringstream headerLine;
-    ostringstream textLine;
-    ostringstream aux_neighString;
-    string neighListString;
-    string message;
-
-    m_totalMsgSent++;
-
-    switch (msgTag) {
-    case 0: // Broadcast - Searching neighbors
-        m_broadcastSent++;
-        break;
-
-    case 1: // Unicast - Indentification sent to a neighbors search
-        m_idMsgSent++;
-        break;
-
-    case 2: // Unicast - Indentification sent to a neighbors search
-        m_trapMsgSent++;
-        break;
-
-    case 3: // Unicast - Special Id sent whether NL is empty
-        m_specialIdMsgSent++;
-        break;
-
-    case 4: // Unicast - Suspect neighbor message
-        m_suspiciousNeighborSent++;
-        break;
-
-    case 5: // Unicast - blocked neighbor message
-        m_blockedNeighborSent++;
-        break;
-
-    case 6: // Unicast - Suspicious reduction message
-        m_suspiciousReductionSent++;
-        break;
-    }
-
-    // Save MiM traces to a file
-    // File name: flysafe_MiM_traces_<node>.txt
-    fileName << m_folderToTraces.c_str() << "flysafe_MiM_traces_"
-             << snifferIp << ".txt";
-
-    headerLine << "time" << "\t\t" << "senderIP" << "\t\t" << "receiverIP" << "\t\t" << "msgBroad" << "\t\t" << "msgId" << "\t\t" << "msgTrap" << "\t\t" 
-              << "originalMessageTime" << "\t\t" 
-              << "senderPosition"  << "\t\t" << "forgedPosition"  << "\t\t" << "senderNeighborList" << endl;
-
-    AppendHeaderToFile(m_sentFile, fileName.str(), headerLine.str());
-
-    for(auto n : neighList)
-    {
-        aux_neighString << '\t' << n.ip << " : x: " << n.position.x << " y: " 
-                        << n.position.y << " z: " << n.position.z << " hop: " << (int)n.hop << " ";
-    }
-
-    neighListString = aux_neighString.str();
-    
-    if (!neighListString.empty()) {
-        neighListString.pop_back(); 
-    }
-
-    switch (msgTag) {
-        case 0: message = "1\t\t0\t\t0"; break;
-        case 1: message = "0\t\t1\t\t0"; break;
-        case 2: message = "0\t\t0\t\t1"; break;
-        default: message = ""; break;
-    }
-
-    textLine << timeNow << "\t\t\t" << senderIp << "\t\t" << receiverIp << "\t\t" << message << "\t\t"
-            << messageTime << "\t\t" 
-            << senderPosition.x << ", " << senderPosition.y << ", " << senderPosition.z << "\t\t"
-            << forgedPosition.x << ", " << forgedPosition.y << ", " << forgedPosition.z << "\t\t" << neighListString << endl;
-    AppendLineToFile(m_sentFile, fileName.str(), textLine.str());
-}
-
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
 /**
  * @brief Update state of malicious nodes
  * 
@@ -1420,7 +1241,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
  * @param nodeIP IP of owner node 
  * @param maliciousList malicious node list from the node
  */
-/*void Statistics::UpdateMaliciousStateControl(double timeNow, Ipv4Address nodeIP,
+void Statistics::UpdateMaliciousStateControl(double timeNow, Ipv4Address nodeIP,
                                         vector<ns3::MyTag::MaliciousNode> maliciousList){
   
   ns3::Statistics::MaliciousControl tempMalicious;
@@ -1449,13 +1270,8 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
       m_maliciousControlState.push_back(tempMalicious);
     }
   }
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
 /**
  * @brief Verify wether a malicious node is already under control by another node
  * 
@@ -1467,7 +1283,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
  * @return true - Node under control
  * @return false - Node not under control
  */
-/*bool Statistics::IsInControlStateList(Ipv4Address nodeIP, Ipv4Address maliciousIP){
+bool Statistics::IsInControlStateList(Ipv4Address nodeIP, Ipv4Address maliciousIP){
   bool inList = false;
 
   for (auto n : m_maliciousControlState){
@@ -1477,13 +1293,8 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
     }
   }
   return inList;
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
 /**
  * @brief Get malicious node state under control
  * 
@@ -1494,7 +1305,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
  * 
  * @return uint8_t malicious node state (0 suspect, 1 blocked)
  */
-/*uint8_t Statistics::GetMaliciousControleState(Ipv4Address nodeIP, Ipv4Address maliciousIP){
+uint8_t Statistics::GetMaliciousControleState(Ipv4Address nodeIP, Ipv4Address maliciousIP){
   uint8_t mState = 0;
 
   for (auto n :m_maliciousControlState){
@@ -1504,13 +1315,9 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
     }
   }
   return mState;
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
+
 /**
  * @brief Set malicious node blocked time
  * 
@@ -1521,7 +1328,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
  * 
  * @param tBlocked blocked time
  */
-/*void Statistics::SetMaliciousBlockedTime(Ipv4Address nodeIP, Ipv4Address maliciousIP, double tBlocked){
+void Statistics::SetMaliciousBlockedTime(Ipv4Address nodeIP, Ipv4Address maliciousIP, double tBlocked){
 
   for (MaliciousHandlerList::iterator i = m_maliciousControlState.begin (); i != m_maliciousControlState.end (); i++){
     if (i->nodeIP == nodeIP && i->maliciousIP == maliciousIP) {
@@ -1532,14 +1339,9 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
       break;
     }
   }
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
-/*void Statistics::PrintMaliciousControlStateList(){
+void Statistics::PrintMaliciousControlStateList(){
 
     if((int)m_maliciousControlState.size() == 0){
     cout << "Statistics: Malicious control State list is empty!" << endl;
@@ -1552,13 +1354,9 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
           << n.tSuspicious << "\t" << n.tBlocked << "\t" << n.avgTime << endl;
       }
   }
-}*/
+}
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
+
 /**
  * @brief Verify wether a malicious node is already under control by another node
  * 
@@ -1569,7 +1367,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
  * @return true - there is the state under control
  * @return false - there is not the state under control
  */
-/*bool Statistics::IsStateInList(uint8_t state){
+bool Statistics::IsStateInList(uint8_t state){
   bool inList = false;
 
   for (auto n : m_maliciousControlState){
@@ -1579,7 +1377,7 @@ void Statistics::MiMCallback(string path, double timeNow, Vector senderPosition,
     }
   }
   return inList;
-}*/
+}
 
 
 /**
@@ -1611,16 +1409,12 @@ void Statistics::MessageResumeLogFile(string simDate){
   AppendHeaderToFile(m_maliciousFile, fileName.str(), textLine.str());
 }
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
+
 /**
  * @brief Save control data from malicious nodes to log files - suspicious and blocked
  * @date Dez 4, 2023
  */
-/*void Statistics::MaliciousControlResumeLogFile(string simDate){
+void Statistics::MaliciousControlResumeLogFile(string simDate){
 
   ostringstream textLine;
   ostringstream fileName; 
@@ -1661,7 +1455,7 @@ void Statistics::MessageResumeLogFile(string simDate){
       AppendHeaderToFile(m_maliciousFile, fileName.str(), textLine.str());
     }
   }
-}*/
+}
 
 
 } // namespace ns3

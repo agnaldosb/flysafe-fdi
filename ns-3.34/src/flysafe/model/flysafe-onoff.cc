@@ -22,8 +22,6 @@
 // George F. Riley, Georgia Tech, Spring 2007
 // Adapted from ApplicationOnOff in GTNetS.
 
-#include <set>
-
 #include "ns3/log.h"
 #include "ns3/address.h"
 #include "ns3/inet-socket-address.h"
@@ -119,14 +117,9 @@ FlySafeOnOff::GetTypeId (void)
     .AddTraceSource ("TxTraces", "A new message is created and is sent - Monitoring neighborhood",
                      MakeTraceSourceAccessor (&FlySafeOnOff::m_txTraceMessage),
                      "ns3::FlySafeOnOff::TracedCallback")
-    /** 
-     * @author Vinicius - MiM
-     * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-     * @date Jul 14, 2025  
-    */
-    /*.AddTraceSource ("TxMaliciousTraces", "A new message is created and is sent - Monitoring malicious neighborhood",
+    .AddTraceSource ("TxMaliciousTraces", "A new message is created and is sent - Monitoring malicious neighborhood",
                      MakeTraceSourceAccessor (&FlySafeOnOff::m_txMaliciousTraces),
-                     "ns3::FlySafeOnOff::TracedCallback")*/
+                     "ns3::FlySafeOnOff::TracedCallback")
     .AddTraceSource ("StopTraces", "Monitor nodes while stopped",
                      MakeTraceSourceAccessor (&FlySafeOnOff::m_stopTraces),
                      "ns3::FlySafeOnOff::TracedCallback")
@@ -155,19 +148,18 @@ FlySafeOnOff::~FlySafeOnOff()
   NS_LOG_FUNCTION (this);
 }
 
+
 /**
  * @brief Configure application settings
  * 
  * @param destiny IP address 
  * @param protocolId - UDP (1) or TCP (2)
  */
-void FlySafeOnOff::Setup(Address address, uint32_t protocolId, double maliciousTime, bool defense) {
+void FlySafeOnOff::Setup(Address address, uint32_t protocolId, double maliciousTime) {
   NS_LOG_FUNCTION(this);
   m_peer = address;
   m_node = GetNodeIpAddress();
   m_nodeIP = InetSocketAddress::ConvertFrom(m_node).GetIpv4();
-
-  m_defense = defense; // Vinicius - MiM - Nov 14, 2025 - Set defense mechanism
   
   m_searchNeighbors = true;
 
@@ -177,13 +169,8 @@ void FlySafeOnOff::Setup(Address address, uint32_t protocolId, double maliciousT
   else // 2 tcp
     m_tid = ns3::TcpSocketFactory::GetTypeId();
 
-  /** 
-  * @author Vinicius - MiM
-  * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-  * @date Jul 14, 2025  
-  */
-  //m_maliciousTime = maliciousTime;
-  //m_maliciousRegister = false;
+  m_maliciousTime = maliciousTime;
+  m_maliciousRegister = false;
 }
 
 
@@ -483,20 +470,11 @@ void FlySafeOnOff::SendPacket ()
 
   if (ThisNode->IsMoving(position)){
      ThisNode->SetPosition(position); // Save for future comparaison
-     if((ThisNode->IsThereAnyNeighbor() || ThisNode->IsThereAnyHandshakeNeighbor()) && !m_searchNeighbors) { // Vinicius - MiM - Nov 14, 2025 - Check also handshake neighbors
-      
+     if(ThisNode->IsThereAnyNeighbor() && !m_searchNeighbors) {
         DecreaseNeighborsQuality();
         CleanNeighborsList();         // Remove nodes with quality 0 from NL  
 
-        ThisNode->DecreaseHandshakeQuality();
-        ThisNode->CleanHandshakeList();
-
-        /** 
-         * @author Vinicius - MiM
-         * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-         * @date Jul 14, 2025  
-        */
-        /*if((int)ThisNode->GetState() == 1){ // Node will be malcious?
+        if((int)ThisNode->GetState() == 1){ // Node will be malcious?
           if (timeNow >= m_maliciousTime){ // Time to becom malicious
               if (!m_maliciousRegister){
               cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - Turn to malicious operation!" << endl;
@@ -508,26 +486,19 @@ void FlySafeOnOff::SendPacket ()
               cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - False position is " 
                   << position.x << ", " << position.y << ", " << position.z << endl;
           }
-        }*/
+        }
 
-        if (ThisNode->IsThereAnyNeighbor(1) || ThisNode->IsThereAnyHandshakeNeighbor()){ // Vinicius - MiM - Nov 14, 2025 - Check also handshake neighbors
+        if (ThisNode->IsThereAnyNeighbor(1)) {
           notifyNewPosition(position);  // Update neighbors with new position
-          if (ThisNode->IsThereAnyNeighbor(1)) {
-            PrintMyNeighborList();
-          }
+          PrintMyNeighborList();
         }
         else{
           m_searchNeighbors = true;
           timeNow = Simulator::Now().GetSeconds();
           neighListFull = GetNeighborIpListFull();
           m_emptyNLTraces(timeNow, position, m_nodeIP, neighListFull);
-          /** 
-           * @author Vinicius - MiM
-           * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-           * @date Jul 14, 2025  
-          */
-          //maliciousList = GetMaliciousNeighborList();
-          //m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
+          maliciousList = GetMaliciousNeighborList();
+          m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
         }
      }
      else{
@@ -535,22 +506,13 @@ void FlySafeOnOff::SendPacket ()
         timeNow = Simulator::Now().GetSeconds();
         neighListFull = GetNeighborIpListFull();
         m_emptyNLTraces(timeNow, position, m_nodeIP, neighListFull);
-        /** 
-         * @author Vinicius - MiM
-         * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-         * @date Jul 14, 2025  
-        */
-        //maliciousList = GetMaliciousNeighborList();
-        //m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
+        maliciousList = GetMaliciousNeighborList();
+        m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
      }
      //else
      
-     /** 
-       * @author Vinicius - MiM
-       * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-       * @date Jul 14, 2025  
-       */
-     /*if((int)ThisNode->GetState() == 1){ // Node will be malcious?
+     
+     if((int)ThisNode->GetState() == 1){ // Node will be malcious?
        if (timeNow >= m_maliciousTime){ // Time to becom malicious
           if (!m_maliciousRegister){
           cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - Turn to malicious operation!" << endl;
@@ -562,7 +524,7 @@ void FlySafeOnOff::SendPacket ()
           cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - False position is " 
                << position.x << ", " << position.y << ", " << position.z << endl;
        }
-     }*/
+     }
 
      if(m_searchNeighbors) {  // Search neighbors sending a broadcast message
         if (!ThisNode->IsThereAnyNeighbor(1) && ThisNode->IsThereAnyNeighbor()){ // If no 1 hop neighbor(s) in NL, clean up NL
@@ -579,48 +541,26 @@ void FlySafeOnOff::SendPacket ()
                   << " FlySafeOnOff - Search neighbors from position x: "
                   << position.x << " y: " << position.y << " z: " << position.z 
                   << "\n" << std::endl; 
-        
-        /** 
-         * @author Vinicius - MiM
-         * @note Handshake public key addition to broadcast tag if defense mechanism is active
-         * @date Nov 13, 2025  
-         */
-        if (m_defense) {
-          broadcastTag.SetPublicKey(ThisNode->GetPublicKey());
-          std::cout << "1 - " << m_nodeIP << " : Set pubKey in Broadcast: " << broadcastTag.GetPublicKey() << std::endl;
-        }
 
         broadcastTag.SetSimpleValue(0);     // Add value to tag
+        broadcastTag.SetNNeighbors(ThisNode->GetNNeighbors());      // Broadcast only with NL = 0       
+        broadcastTag.SetPosition(position); // Add nodes positin to tag
         broadcastTag.SetMessageTime(timeNow);
 
-        /** 
-         * @author Vinicius - MiM
-         * @note Send information to neighbor nodes only if defense mechanism is not active
-         * @date Nov 14, 2025  
-         */
-        if (!m_defense) {
-          broadcastTag.SetNNeighbors(ThisNode->GetNNeighbors());      // Broadcast only with NL = 0       
-          broadcastTag.SetPosition(position); // Add nodes positin to tag
-          
-          if (ThisNode->GetNNeighbors() != 0){ // Get NL and add to tag
-            neighListVector = GetNeighborListVector();
+        if (ThisNode->GetNNeighbors() != 0){ // Get NL and add to tag
+          neighListVector = GetNeighborListVector();
 
-            for(auto n :neighListVector){ // Copy NL to a MyTag::NeighInfos vector type
-              nodeInfo.ip = n.ip;
-              nodeInfo.x = n.x;
-              nodeInfo.y = n.y;
-              nodeInfo.z = n.z; 
-              nodeInfo.hop = n.hop;
-              nodeInfo.state = n.state;
-              nodeInfosVectorTag.push_back(nodeInfo);
-            }
-          }  
-          broadcastTag.SetNeighInfosVector(nodeInfosVectorTag);
-        }
-        else {  // If defense mechanism is active, do not send number of neighbors and position. But is necessary set these fields to default values, because this information is serialized
-          broadcastTag.SetNNeighbors(0);
-          broadcastTag.SetPosition(Vector(0, 0, 0));
-        }
+          for(auto n :neighListVector){ // Copy NL to a MyTag::NeighInfos vector type
+            nodeInfo.ip = n.ip;
+            nodeInfo.x = n.x;
+            nodeInfo.y = n.y;
+            nodeInfo.z = n.z; 
+            nodeInfo.hop = n.hop;
+            nodeInfo.state = n.state;
+            nodeInfosVectorTag.push_back(nodeInfo);
+          }
+        }  
+        broadcastTag.SetNeighInfosVector(nodeInfosVectorTag);
         
         packet->AddPacketTag(broadcastTag); // Add tag to the packet
         
@@ -649,13 +589,8 @@ void FlySafeOnOff::SendPacket ()
         }
         neighListFull = GetNeighborIpListFull();
         m_txTraceMessage(timeNow, m_nodeIP, m_nodeIP.GetBroadcast(), 0, "Hello", position, neighListFull); // Callback to trace messages sent
-        /** 
-         * @author Vinicius - MiM
-         * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-         * @date Jul 14, 2025  
-        */
-        //maliciousList = GetMaliciousNeighborList();
-        //m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
+        maliciousList = GetMaliciousNeighborList();
+        m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
      }   
   }
   else{
@@ -665,13 +600,8 @@ void FlySafeOnOff::SendPacket ()
     cout << m_nodeIP << " : " << timeNow << " - Node stopped!" << endl; 
     m_stopTraces(timeNow, position, m_nodeIP, m_nodeIP, 4, 
                       "Stopped", neighListFull, timeNow);
-    /** 
-      * @author Vinicius - MiM
-      * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
-      * @date Jul 14, 2025  
-      */
-    //maliciousList = GetMaliciousNeighborList();
-    //m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
+    maliciousList = GetMaliciousNeighborList();
+    m_txMaliciousTraces(timeNow, m_nodeIP, maliciousList);
   }      
 
   m_residualBits = 0;
@@ -839,38 +769,8 @@ void FlySafeOnOff::notifyNewPosition(Vector position){
 
       socket->Connect(DestinyAddress);
       Ptr<Packet> packet;
-
-      /** 
-       * @author Vinicius - MiM
-       * @note Cryptographic if defense mechanism is active
-       * @date Nov 19, 2025  
-       */
-      std::string message = "Trap!";
-      
-      if (m_defense) {
-          Ptr<UniformRandomVariable> rng = CreateObject<UniformRandomVariable>();
-          std::string nonce(CRYPTO_NPUBBYTES, 0);
-          for(int k=0; k<CRYPTO_NPUBBYTES; k++) nonce[k] = (char)rng->GetInteger(0, 255);
-
-          std::string payload = message + nonce;
-          packet = Create<Packet>(reinterpret_cast<const uint8_t *>(payload.c_str()), payload.size());
-
-          std::string key = ThisNode->GetSharedKey(neighborList[i]);
-          
-          if (!key.empty()) {
-             packet->AddPacketTag(tag, key, nonce);
-          } else {
-             socket->Close();
-             continue;
-          }
-      } 
-      else {
-          packet = Create<Packet>(reinterpret_cast<const uint8_t *>(message.c_str()), message.size());
-          packet->AddPacketTag(tag);
-      }
-
-      //packet = Create<Packet>(reinterpret_cast<const uint8_t *>("Trap!"),5); // Create a packet to send the message // Vinicius - MiM - Nov 19, 2025
-      //packet->AddPacketTag(tag); // add the tag to packet
+      packet = Create<Packet>(reinterpret_cast<const uint8_t *>("Trap!"),5); // Create a packet to send the message 
+      packet->AddPacketTag(tag); // add the tag to packet
       socket->Send(packet); // Send packet
       socket->Close();  // Close socket
 
@@ -881,51 +781,7 @@ void FlySafeOnOff::notifyNewPosition(Vector position){
         m_emptyNLTraces(timeNow, position, m_nodeIP, neighListFull);
       }
     }
-  }
-  
-  if (m_defense) {
-    std::set<Ipv4Address> handshakeList = ThisNode->GetHandshakeNeighbors();
-
-    for (auto const& ip : handshakeList) 
-    {
-      cout << m_nodeIP << " : " << timeNow 
-            << " FlySafeOnOff - Sent trap message to handshake neighbor " << ip << std::endl; 
-
-      Address DestinyAddress(InetSocketAddress(ip, 9));
-      Ptr<Socket> socket = Socket::CreateSocket(GetNode(), m_tid);
-
-      if (socket->Bind() == -1) {
-          NS_FATAL_ERROR("Failed to bind socket");
-      }
-
-      socket->Connect(DestinyAddress);
-      
-      Ptr<Packet> packet;
-      std::string message = "Trap!";
-      
-      Ptr<UniformRandomVariable> rng = CreateObject<UniformRandomVariable>();
-      std::string nonce(CRYPTO_NPUBBYTES, 0);
-      for(int k=0; k<CRYPTO_NPUBBYTES; k++) nonce[k] = (char)rng->GetInteger(0, 255);
-
-      std::string payload = message + nonce;
-      packet = Create<Packet>(reinterpret_cast<const uint8_t *>(payload.c_str()), payload.size());
-      
-      std::string key = ThisNode->GetSharedKey(ip);
-      
-      if (!key.empty()) {
-          packet->AddPacketTag(tag, key, nonce);
-      } else {
-          socket->Close();
-          continue;
-      }
-
-      socket->Send(packet); 
-      socket->Close();
-
-      m_txTraceMessage(timeNow, m_nodeIP, ip, 2, "Trap", position, neighListFull); 
-    }
-
-  }
+  } 
 }
 
 
@@ -1072,87 +928,20 @@ void FlySafeOnOff::SendMessage(Address addressTo, string message,
   }
 
   socket->Connect(destinyAddress);
-  /** 
-   * @author Vinicius - MiM
-   * @note Cryptographic nonce addition to Trap message
-   * @date Nov 19, 2025  
-   */
-
-  std::string nonce = "";
-  std::string finalMessage = message;
-
-  // If defense mechanism is active and message is a Trap message
-  if (m_defense && tagValue == 2) {
-      // Create a random nonce (16 bytes)
-      Ptr<UniformRandomVariable> rng = CreateObject<UniformRandomVariable>();
-      nonce.resize(CRYPTO_NPUBBYTES);
-      for(int i=0; i<CRYPTO_NPUBBYTES; i++) {
-          nonce[i] = (char)rng->GetInteger(0, 255);
-      }
-
-      // Append nonce to message
-      finalMessage = message + nonce; // "Trap!" + [16 random bytes]
-  }
-
   Ptr<Packet> packet;
-  packet = Create<Packet>(reinterpret_cast<const uint8_t *>(finalMessage.c_str()),
-                          finalMessage.size());
+
+  packet = Create<Packet>(reinterpret_cast<const uint8_t *>(message.c_str()),
+                          message.size());
   MyTag tagToSend;
   tagToSend.SetSimpleValue(tagValue);         // Add tag value
-
-  /** 
-   * @author Vinicius - MiM
-   * @note Send information to neighbor nodes only if defense mechanism is not active or tag is not 0, 1 or 3
-   * @date Nov 14, 2025  
-   */
-  if (!m_defense || !(tagValue == 0 || tagValue == 1 || tagValue == 3)) {
-    tagToSend.SetNNeighbors(nNeigbors);         // Add the number of neighbor nodes to tag
-    tagToSend.SetPosition(nodePosition);        // Add nodes positin to tag
-    tagToSend.SetNeighInfosVector(nodeInfos);   // Add nodes NL to tag
-  }
-  else { // If defense mechanism is active, do not send number of neighbors and position. But is necessary set these fields to default values, because this information is serialized
-    tagToSend.SetNNeighbors(0);
-    tagToSend.SetPosition(Vector(0, 0, 0));
-  }
+  tagToSend.SetNNeighbors(nNeigbors);         // Add the number of neighbor nodes to tag
+  tagToSend.SetPosition(nodePosition);        // Add nodes positin to tag
+  tagToSend.SetNeighInfosVector(nodeInfos);   // Add nodes NL to tag
   
   timeNow = Simulator::Now().GetSeconds();
   tagToSend.SetMessageTime(timeNow);
 
-  /** 
-   * @author Vinicius - MiM
-   * @note Handshake public key addition to tag if defense mechanism is active
-   * @date Nov 13, 2025  
-   */
-  if (m_defense && (tagValue == 0 || tagValue == 1 || tagValue == 3)){ //  Broadcast or Identification or Special Identification{
-    std::string myPubKey = GetNode()->GetPublicKey();
-    tagToSend.SetPublicKey(myPubKey);
-    std::cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - Set pubKey in message with tag " << (int)tagValue << ": " << tagToSend.GetPublicKey() << std::endl;
-  }
-
-  /** 
-   * @author Vinicius - MiM
-   * @note Encrypted Tag addition to Trap message if defense mechanism is active
-   * @date Nov 19, 2025  
-   */
-  if (m_defense && tagValue == 2) {
-      Ipv4Address destinyIP = InetSocketAddress::ConvertFrom(addressTo).GetIpv4();
-      std::string key = GetNode()->GetSharedKey(destinyIP);
-      if (!key.empty()) {
-          std::cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - Sending Encrypted Trap to " << destinyIP << std::endl;
-          packet->AddPacketTag(tagToSend, key, nonce);
-      } 
-      // Else case should not happen, because shared key is created during handshake
-      else {
-        socket->Close();
-        std::cout << m_nodeIP << " : " << timeNow << " FlySafeOnOff - ERROR: Shared key with " << destinyIP << " not found! Message not sent." << std::endl;
-        return;
-      }
-  } 
-  else {
-      packet->AddPacketTag(tagToSend);
-  }
-
-  //packet->AddPacketTag(tagToSend); // Vinicius - MiM - Nov 19, 2025
+  packet->AddPacketTag(tagToSend);
   socket->Send(packet);
   socket->Close();
 }
@@ -1184,18 +973,13 @@ vector<ns3::MyTag::NeighborFull> FlySafeOnOff::GetNeighborIpListFull() {
   return neighListFull;
 }
 
-/** 
- * @author Vinicius - MiM
- * @note Reason for comment: Malicious UAV Implementation - Used for injection of fake data
- * @date Jul 14, 2025  
- */
 /**
  * @brief Get malicious neighbor list from the node
  * @date Nov 27, 2023
  * 
  * @return vector<ns3::MyTag::MaliciousNode> 
  */
-/*vector<ns3::MyTag::MaliciousNode> FlySafeOnOff::GetMaliciousNeighborList() { 
+vector<ns3::MyTag::MaliciousNode> FlySafeOnOff::GetMaliciousNeighborList() { 
   vector<Ipv4Address> maliciousIPList;
   vector<ns3::MyTag::MaliciousNode> maliciousListFull;
   ns3::MyTag::MaliciousNode maliciousInfo;
@@ -1212,6 +996,6 @@ vector<ns3::MyTag::NeighborFull> FlySafeOnOff::GetNeighborIpListFull() {
     maliciousListFull.push_back(maliciousInfo);
   }
   return maliciousListFull;
-}*/
+}
 
 } // Namespace ns3
