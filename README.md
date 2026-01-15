@@ -49,13 +49,13 @@ Follow the steps below to integrate the files from this repository into your NS-
 3.  **Scratch Folder:**
     *   Copy the file from the `ns-3.34/scratch/` folder from this repository to the `ns-3.34/scratch/` folder of your NS-3.
 
-## How to Run the Simulation
+## FlySafe execution
 
 There are two main ways to run the simulation: via command line for a single execution or using the automation script for multiple executions.
 
-### 1. Terminal Execution (Single Simulation)
-
-To run a single instance of the simulation, use the `./waf` command from the `ns-3.34/` directory:
+1. **Terminal Execution (Single Simulation)**
+2. 
+To run a single instance of the simulation, execute the `./waf` command from the `ns-3.34/` directory as follows:
 
 ```bash
 ./waf --run "scratch/flysafe.cc -nNodes=40 -runMode=R -nMalicious=1 -defense=true -mitigation=true" > result.txt
@@ -69,6 +69,10 @@ To run a single instance of the simulation, use the `./waf` command from the `ns
 *   `-defense=true`: Enables (`true`) or disables (`false`) security defense mechanisms (encryption).
 *   `-mitigation=true`: Enables (`true`) or disables (`false`) attack mitigation mechanisms.
 *   `> result.txt`: Redirects all simulation log output to the `result.txt` file. This facilitates viewing results and avoids cluttering the terminal with too much information.
+
+```bash
+./waf --run "scratch/flysafe.cc -nNodes=40 -runMode=R -nMalicious=1 -defense=true -mitigation=true" > result.txt
+```
 
 ### 2. Script Execution (Multiple Simulations)
 
