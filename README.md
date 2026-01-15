@@ -40,20 +40,14 @@ Follow the steps below to integrate the files from this repository into your NS-
 
 > **Note:** It is recommended to backup the original files of your `ns-3.34` directory before proceeding.
 
-1.  **Root Directory:**
-    *   Open the `ns-3.34/` folder of your NS-3 and add the files from the `ns-3.34/` folder of this repository.
+1.  **FlySafe Module:**
+    *   Copy the entire `ns-3.34/src/flysafe/` folder from this repository to `ns-3.34/src/` folder of your NS-3. 
 
-2.  **Scratch Folder:**
-    *   Open the `ns-3.34/scratch/` folder of your NS-3 and add the files from the `ns-3.34/scratch/` folder of this repository.
-
-3.  **FlySafe Module:**
-    *   Open the `ns-3.34/src/` folder of your NS-3 and add the entire `ns-3.34/src/flysafe/` folder from this repository.
-
-4.  **Network Models:**
-    *   Open the `ns-3.34/src/network/model/` folder of your NS-3 and replace the existing files with the corresponding files found in this same folder of this repository.
-
-5.  **Wifi Models:**
-    *   Open the `ns-3.34/src/wifi/model/` folder of your NS-3 and replace the existing files with the corresponding files found in this same folder of this repository.
+2.  **Network Models:**
+    *   Copy the files from `ns-3.34/src/network/model/` folder from this repository to the same folder of your NS-3.
+  
+3.  **Scratch Folder:**
+    *   Copy the file from the `ns-3.34/scratch/` folder from this repository to the `ns-3.34/scratch/` folder of your NS-3.
 
 ## How to Run the Simulation
 
