@@ -78,14 +78,14 @@ The *results.txt* is saved in the `ns-3.34/` directory.
 
 ### 2. Script Execution (Multiple Simulations)
 
-To perform test batteries, use the `run_flysafe.sh` file. This script runs the simulation sequentially the number of times you desire.
+To perform several simulations on the run, use the `run_flysafe.sh` file. This script runs the simulation sequentially the number of times you desire.
 
 **How to configure and use:**
 
 1.  Open the `run_flysafe.sh` file in a text editor.
 2.  Locate the variables at the beginning of the file to configure your simulation:
     *   `TOTAL_RUNS`: Change this value to define how many times the simulation should run (e.g., `TOTAL_RUNS=35`).
-    *   `SIM_COMMAND`: Change this line to define the simulation parameters (-nNodes -runMode -nMalicious -defense -mitigation), just as you would in the terminal.
+    *   `SIM_COMMAND`: Change this line to define the simulation parameters (-nNodes -runMode -nMalicious), just as you would in the terminal.
 3.  Grant execution permission to the script (if running for the first time):
 
 ```bash
