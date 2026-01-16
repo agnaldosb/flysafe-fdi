@@ -61,26 +61,20 @@ To run a single instance of the simulation, execute the `./waf` command from the
 ./waf --run "scratch/flysafe.cc -nNodes=40 -runMode=R -nMalicious=1"
 ```
 
-FlySafe prints in the terminal the logs from simulation. It's recommended to save these logs for future analysis. In this way, redirect these logs for a file as follows:
+FlySafe prints the logs from simulation in the terminal. It's recommended to save them for future analysis. In this way, redirect these logs for a file as follows:
 
 ```bash
 ./waf --run "scratch/flysafe.cc -nNodes=40 -runMode=R -nMalicious=1" > result.txt
 ```
 
-The results.txt is saved in the `ns-3.34/` directory.
+The *results.txt* is saved in the `ns-3.34/` directory.
 
 **Parameter Explanation:**
 
 *   `-nNodes=40`: Defines the total number of nodes (UAVs) in the simulation.
 *   `-runMode=R`: Defines the mobility/execution mode (e.g., 'R' for Random Way Point).
 *   `-nMalicious=1`: Defines the number of malicious nodes present in the network.
-*   `-defense=true`: Enables (`true`) or disables (`false`) security defense mechanisms (encryption).
-*   `-mitigation=true`: Enables (`true`) or disables (`false`) attack mitigation mechanisms.
 *   `> result.txt`: Redirects all simulation log output to the `result.txt` file. This facilitates viewing results and avoids cluttering the terminal with too much information.
-
-```bash
-./waf --run "scratch/flysafe.cc -nNodes=40 -runMode=R -nMalicious=1 -defense=true -mitigation=true" > result.txt
-```
 
 ### 2. Script Execution (Multiple Simulations)
 
